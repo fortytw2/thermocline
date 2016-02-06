@@ -15,6 +15,8 @@ import (
 )
 
 func TestWorker(t *testing.T) {
+	t.Parallel()
+
 	var broker thermocline.Broker
 	broker = mem.NewBroker()
 
@@ -28,7 +30,8 @@ func TestWorker(t *testing.T) {
 		t.Errorf("could not open queue '%s'", err)
 	}
 
-	for i := range iter.N(128) {
+	tn := rand.Intn(250)
+	for i := range iter.N(tn) {
 		task, err := thermocline.NewTask(fmt.Sprintf("test %d", i))
 		if err != nil {
 			t.Error("could not create test task", err)
@@ -40,7 +43,7 @@ func TestWorker(t *testing.T) {
 	stopper := make(chan struct{})
 	var worked int64
 	wg := &sync.WaitGroup{}
-	for _ = range iter.N(rand.Intn(250)) {
+	for _ = range iter.N(rand.Intn(rand.Intn(250))) {
 		wg.Add(1)
 		go thermocline.NewWorker(reader, writer, func(task *thermocline.Task) ([]*thermocline.Task, error) {
 			atomic.AddInt64(&worked, 1)
@@ -53,12 +56,14 @@ func TestWorker(t *testing.T) {
 
 	wg.Wait()
 
-	if atomic.LoadInt64(&worked) != 128 {
-		t.Error("128 tasks not worked in basic test after 500ms")
+	if atomic.LoadInt64(&worked) != int64(tn) {
+		t.Errorf("%d tasks not worked in basic test after 500ms, instead %d", tn, atomic.LoadInt64(&worked))
 	}
 }
 
 func TestWorkerRetries(t *testing.T) {
+	t.Parallel()
+
 	var broker thermocline.Broker
 	broker = mem.NewBroker()
 
