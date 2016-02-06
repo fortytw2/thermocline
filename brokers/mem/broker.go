@@ -9,40 +9,69 @@ import (
 
 // Broker is a pure in memory message broker
 type Broker struct {
-	queues   map[string]chan *thermocline.Task
-	failures map[string]int
+	egress  map[string]chan *thermocline.Task
+	ingress map[string]chan *thermocline.Task
+
+	stats *thermocline.Stats
 	*sync.Mutex
 }
 
 // NewBroker returns the allocated message broker
 func NewBroker() *Broker {
-	return &Broker{
-		queues: make(map[string]chan *thermocline.Task),
-		Mutex:  &sync.Mutex{},
+	b := &Broker{
+		egress:  make(map[string]chan *thermocline.Task),
+		ingress: make(map[string]chan *thermocline.Task),
+		stats: &thermocline.Stats{
+			Total: make(map[string]int),
+		},
+		Mutex: &sync.Mutex{},
+	}
+	return b
+}
+
+func (b *Broker) monitor(queue, version string) {
+	key := fmt.Sprintf("%s:%s", queue, version)
+	for {
+		select {
+		case t := <-b.ingress[key]:
+			if t.Retries == 0 {
+				b.Lock()
+				b.stats.Total[key]++
+				b.Unlock()
+				b.egress[key] <- t
+			}
+		}
 	}
 }
 
 // Open returns the broker
-func (b *Broker) Open(queue string, version string) (chan *thermocline.Task, error) {
+func (b *Broker) Read(queue string, version string) (<-chan *thermocline.Task, error) {
 	key := fmt.Sprintf("%s:%s", queue, version)
 
-	c, ok := b.queues[key]
+	c, ok := b.egress[key]
 	if !ok {
-		b.queues[key] = make(chan *thermocline.Task, 1024)
-		return b.queues[key], nil
+		b.egress[key] = make(chan *thermocline.Task, 1024)
+		return b.egress[key], nil
 	}
 
 	return c, nil
 }
 
-func (b *Broker) Failures(queue, version string) (int, error) {
+// Open returns the broker
+func (b *Broker) Write(queue string, version string) (chan<- *thermocline.Task, error) {
 	key := fmt.Sprintf("%s:%s", queue, version)
-	b.Lock()
-	defer b.Unlock()
-	f, ok := b.failures[key]
+
+	c, ok := b.ingress[key]
 	if !ok {
-		b.failures[key] = 0
-		return 0, nil
+		b.ingress[key] = make(chan *thermocline.Task, 1024)
+		go b.monitor(queue, version)
+		return b.ingress[key], nil
 	}
-	return f, nil
+
+	return c, nil
+}
+
+func (b *Broker) Stats() *thermocline.Stats {
+
+	return nil
 }

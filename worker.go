@@ -2,14 +2,16 @@ package thermocline
 
 // A Worker is the basic unit of task execution
 type Worker struct {
-	queue     chan *Task
+	ingress   <-chan *Task
+	egress    chan<- *Task
 	processFn Processor
 	stop      chan struct{}
 }
 
-func NewWorker(queue chan *Task, fn Processor, stopper chan struct{}) *Worker {
+func NewWorker(ingress <-chan *Task, egress chan<- *Task, fn Processor, stopper chan struct{}) *Worker {
 	return &Worker{
-		queue:     queue,
+		ingress:   ingress,
+		egress:    egress,
 		processFn: fn,
 		stop:      stopper,
 	}
@@ -22,12 +24,12 @@ func (w *Worker) Work() {
 		// safely stop the worker
 		case <-w.stop:
 			return
-		case task := <-w.queue:
+		case task := <-w.ingress:
 			tasks, err := w.processFn(task)
 			if err != nil {
 				if task.Retries < MaxRetries {
 					task.Retries++
-					w.queue <- task
+					w.egress <- task
 					continue
 				}
 			}
@@ -35,7 +37,7 @@ func (w *Worker) Work() {
 			// submit any new tasks returned by the old one
 			if tasks != nil {
 				for _, t := range tasks {
-					w.queue <- t
+					w.egress <- t
 				}
 			}
 		}
