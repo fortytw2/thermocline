@@ -39,6 +39,8 @@ func (b *Broker) monitor(queue, version string) {
 				b.stats.Total[key]++
 				b.Unlock()
 				b.egress[key] <- t
+			} else {
+				b.egress[key] <- t
 			}
 		}
 	}
