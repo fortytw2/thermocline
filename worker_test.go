@@ -2,6 +2,7 @@ package thermocline_test
 
 import (
 	"fmt"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -25,7 +26,7 @@ func TestWorker(t *testing.T) {
 		t.Errorf("could not open queue '%s'", err)
 	}
 
-	for i := range iter.N(10) {
+	for i := range iter.N(128) {
 		task, err := thermocline.NewTask(fmt.Sprintf("test %d", i))
 		if err != nil {
 			t.Error("could not create test task", err)
@@ -36,18 +37,22 @@ func TestWorker(t *testing.T) {
 
 	stopper := make(chan struct{})
 	var worked int64
-	w := thermocline.NewWorker(reader, writer, func(task *thermocline.Task) ([]*thermocline.Task, error) {
-		atomic.AddInt64(&worked, 1)
-		return nil, nil
-	}, stopper)
-
-	go w.Work()
+	wg := &sync.WaitGroup{}
+	for _ = range iter.N(100) {
+		wg.Add(1)
+		go thermocline.NewWorker(reader, writer, func(task *thermocline.Task) ([]*thermocline.Task, error) {
+			atomic.AddInt64(&worked, 1)
+			return nil, nil
+		}, stopper).Work(wg)
+	}
 
 	time.Sleep(500 * time.Millisecond)
 	close(stopper)
 
-	if atomic.LoadInt64(&worked) != 10 {
-		t.Error("10 tasks not worked in basic test after 500ms")
+	wg.Wait()
+
+	if atomic.LoadInt64(&worked) != 128 {
+		t.Error("128 tasks not worked in basic test after 500ms")
 	}
 }
 

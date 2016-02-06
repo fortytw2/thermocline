@@ -1,5 +1,7 @@
 package thermocline
 
+import "sync"
+
 // A Worker is the basic unit of task execution
 type Worker struct {
 	ingress   <-chan *Task
@@ -8,6 +10,7 @@ type Worker struct {
 	stop      chan struct{}
 }
 
+// NewWorker creates a new worker
 func NewWorker(ingress <-chan *Task, egress chan<- *Task, fn Processor, stopper chan struct{}) *Worker {
 	return &Worker{
 		ingress:   ingress,
@@ -18,7 +21,8 @@ func NewWorker(ingress <-chan *Task, egress chan<- *Task, fn Processor, stopper 
 }
 
 // Work turns on the worker
-func (w *Worker) Work() {
+func (w *Worker) Work(wg *sync.WaitGroup) {
+	defer wg.Done()
 	for {
 		select {
 		// safely stop the worker
