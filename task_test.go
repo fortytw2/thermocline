@@ -23,7 +23,7 @@ func TestDelayedTask(t *testing.T) {
 	<-reader
 	after := time.Now()
 
-	if after.Sub(before) <= time.Second {
+	if after.Sub(before) <= time.Second - time.Millisecond * 100 {
 		t.Fatalf("task appeared before duration!")
 	}
 }
