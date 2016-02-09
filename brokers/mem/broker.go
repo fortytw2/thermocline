@@ -50,6 +50,8 @@ func (b *Broker) monitor(queue, version string) {
 func (b *Broker) Read(queue string, version string) (<-chan *thermocline.Task, error) {
 	key := fmt.Sprintf("%s:%s", queue, version)
 
+	b.Lock()
+	defer b.Unlock()
 	c, ok := b.egress[key]
 	if !ok {
 		b.egress[key] = make(chan *thermocline.Task, 1024)
