@@ -63,6 +63,8 @@ func (b *Broker) Read(queue string, version string) (<-chan *thermocline.Task, e
 func (b *Broker) Write(queue string, version string) (chan<- *thermocline.Task, error) {
 	key := fmt.Sprintf("%s:%s", queue, version)
 
+	b.Lock()
+	defer b.Unlock()
 	c, ok := b.ingress[key]
 	if !ok {
 		b.ingress[key] = make(chan *thermocline.Task, 1024)
@@ -73,7 +75,11 @@ func (b *Broker) Write(queue string, version string) (chan<- *thermocline.Task, 
 	return c, nil
 }
 
+// Stats returns all queue stats
 func (b *Broker) Stats() *thermocline.Stats {
+	b.Lock()
+	defer b.Unlock()
 
-	return nil
+	out := *b.stats
+	return &out
 }

@@ -30,7 +30,8 @@ func TestWorker(t *testing.T) {
 		t.Errorf("could not open queue '%s'", err)
 	}
 
-	tn := rand.Intn(250)
+	tn := rand.Intn(256)
+	//TODO(fortytw2): don't use iter for tests, even though it's nice
 	for i := range iter.N(tn) {
 		task, err := thermocline.NewTask(fmt.Sprintf("test %d", i))
 		if err != nil {
@@ -43,7 +44,7 @@ func TestWorker(t *testing.T) {
 	stopper := make(chan struct{})
 	var worked int64
 	wg := &sync.WaitGroup{}
-	for _ = range iter.N(rand.Intn(rand.Intn(250))) {
+	for _ = range iter.N(rand.Intn(rand.Intn(256))) {
 		wg.Add(1)
 		go thermocline.NewWorker(reader, writer, func(task *thermocline.Task) ([]*thermocline.Task, error) {
 			atomic.AddInt64(&worked, 1)
@@ -90,7 +91,7 @@ func TestWorkerRetries(t *testing.T) {
 	stopper := make(chan struct{})
 	var worked int64
 	wg := &sync.WaitGroup{}
-	for _ = range iter.N(rand.Intn(250)) {
+	for _ = range iter.N(rand.Intn(256)) {
 		wg.Add(1)
 		go thermocline.NewWorker(reader, writer, func(task *thermocline.Task) ([]*thermocline.Task, error) {
 			atomic.AddInt64(&worked, 1)
