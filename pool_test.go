@@ -10,6 +10,8 @@ import (
 )
 
 func TestPool(t *testing.T) {
+	t.Parallel()
+
 	var b thermocline.Broker
 	b = mem.NewBroker()
 
