@@ -5,4 +5,9 @@ go:
  - tip
 
 script:
- - go test -v -race -parallel 5 ./...
+ - go test -v -race -parallel 5 -coverprofile=coverage.txt -covermode=atomic ./
+
+before_install:
+  - pip install --user codecov
+after_success:
+  - codecov
