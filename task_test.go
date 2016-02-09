@@ -5,24 +5,12 @@ import (
 	"time"
 
 	"github.com/fortytw2/thermocline"
-	"github.com/fortytw2/thermocline/brokers/mem"
 )
 
 func TestDelayedTask(t *testing.T) {
 	t.Parallel()
 
-	var b thermocline.Broker
-	b = mem.NewBroker()
-
-	reader, err := b.Read("test", thermocline.NoVersion)
-	if err != nil {
-		t.Errorf("could not open queue '%s'", err)
-	}
-
-	writer, err := b.Write("test", thermocline.NoVersion)
-	if err != nil {
-		t.Errorf("could not open queue '%s'", err)
-	}
+	_, reader, writer := SetupBroker(t)
 
 	task, err := thermocline.NewDelayedTask("task infos", time.Second)
 	if err != nil {
@@ -43,18 +31,11 @@ func TestDelayedTask(t *testing.T) {
 func TestLongDelayedTask(t *testing.T) {
 	t.Parallel()
 
-	var b thermocline.Broker
-	b = mem.NewBroker()
-
-	reader, err := b.Read("test", thermocline.NoVersion)
-	if err != nil {
-		t.Errorf("could not open queue '%s'", err)
+	if testing.Short() {
+		t.Skip("skipping in short mode.")
 	}
 
-	writer, err := b.Write("test", thermocline.NoVersion)
-	if err != nil {
-		t.Errorf("could not open queue '%s'", err)
-	}
+	_, reader, writer := SetupBroker(t)
 
 	task, err := thermocline.NewDelayedTask("task infos", time.Second*10)
 	if err != nil {
