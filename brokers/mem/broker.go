@@ -3,6 +3,7 @@ package mem
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/fortytw2/thermocline"
 )
@@ -34,15 +35,28 @@ func (b *Broker) monitor(queue, version string) {
 	for {
 		select {
 		case t := <-b.ingress[key]:
-			if t.Retries == 0 {
-				b.Lock()
-				b.stats.Total[key]++
-				b.Unlock()
-				b.egress[key] <- t
+			now := time.Now()
+			// handle delayed jobs
+			if now.Before(t.WorkAt) {
+				go func() {
+					time.Sleep(t.WorkAt.Sub(now))
+					b.addTask(key, t)
+				}()
 			} else {
-				b.egress[key] <- t
+				b.addTask(key, t)
 			}
 		}
+	}
+}
+
+func (b *Broker) addTask(key string, t *thermocline.Task) {
+	if t.Retries == 0 {
+		b.Lock()
+		b.stats.Total[key]++
+		b.Unlock()
+		b.egress[key] <- t
+	} else {
+		b.egress[key] <- t
 	}
 }
 
