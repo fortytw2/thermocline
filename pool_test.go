@@ -67,11 +67,3 @@ func TestPool(t *testing.T) {
 		t.Errorf("more than 300 tasks should be worked, %d", a)
 	}
 }
-
-func TestPoolAdd(t *testing.T) {
-
-}
-
-func TestPoolRem(t *testing.T) {
-
-}

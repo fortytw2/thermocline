@@ -108,7 +108,3 @@ func TestWorkerRetries(t *testing.T) {
 		t.Errorf("%d tasks not worked in retry test after 500ms, actually %d", tn*3, atomic.LoadInt64(&worked))
 	}
 }
-
-func TestWorkerStop(t *testing.T) {
-
-}
