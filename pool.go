@@ -57,7 +57,7 @@ func NewPool(queue, version string, b Broker, fn Processor, workers int) (*Pool,
 // Add changes the number of workers
 func (p *Pool) Add(n int) error {
 	if n >= 1 {
-		for _ = range iter.N(n) {
+		for range iter.N(n) {
 			stopC := make(chan struct{})
 			p.wg.Add(1)
 			go NewWorker(p.read, p.write, p.fn, stopC).Work(p.wg)
@@ -66,7 +66,7 @@ func (p *Pool) Add(n int) error {
 			p.Unlock()
 		}
 	} else if n <= -1 {
-		for _ = range iter.N(-1 * n) {
+		for range iter.N(-1 * n) {
 			p.Lock()
 			// close channel to stop worker
 			close(p.workers[len(p.workers)-1])

@@ -44,7 +44,7 @@ func TestWorker(t *testing.T) {
 	stopper := make(chan struct{})
 	var worked int64
 	wg := &sync.WaitGroup{}
-	for _ = range iter.N(rand.Intn(rand.Intn(256))) {
+	for range iter.N(rand.Intn(rand.Intn(256))) {
 		wg.Add(1)
 		go thermocline.NewWorker(reader, writer, func(task *thermocline.Task) ([]*thermocline.Task, error) {
 			atomic.AddInt64(&worked, 1)
@@ -91,7 +91,7 @@ func TestWorkerRetries(t *testing.T) {
 	stopper := make(chan struct{})
 	var worked int64
 	wg := &sync.WaitGroup{}
-	for _ = range iter.N(rand.Intn(256)) {
+	for range iter.N(rand.Intn(256)) {
 		wg.Add(1)
 		go thermocline.NewWorker(reader, writer, func(task *thermocline.Task) ([]*thermocline.Task, error) {
 			atomic.AddInt64(&worked, 1)
