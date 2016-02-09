@@ -1,4 +1,4 @@
-thermocline [![Build Status](https://travis-ci.com/fortytw2/thermocline.svg?token=UxRGpS8yzyKfsTeFz1dM&branch=master)](https://travis-ci.com/fortytw2/thermocline) [![GoDoc](https://godoc.org/github.com/fortytw2/thermocline?status.svg)](http://godoc.org/github.com/fortytw2/thermocline)
+thermocline [![Build Status](https://travis-ci.com/fortytw2/thermocline.svg?token=UxRGpS8yzyKfsTeFz1dM&branch=master)](https://travis-ci.com/fortytw2/thermocline) [![GoDoc](https://godoc.org/github.com/fortytw2/thermocline?status.svg)](http://godoc.org/github.com/fortytw2/thermocline) [![Go Report Card](https://goreportcard.com/badge/github.com/fortytw2/thermocline)](https://goreportcard.com/report/github.com/fortytw2/thermocline)
 ------
 
 A Library for implementing background-job-processing systems. Think of it as the implementation of the business-logic of `sidekiq`, without any convenience methods/helpful scheduling logic. Just raw workers, pools, and queues.
