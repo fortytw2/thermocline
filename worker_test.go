@@ -17,18 +17,7 @@ import (
 func TestWorker(t *testing.T) {
 	t.Parallel()
 
-	var broker thermocline.Broker
-	broker = mem.NewBroker()
-
-	reader, err := broker.Read("test", thermocline.NoVersion)
-	if err != nil {
-		t.Errorf("could not open queue '%s'", err)
-	}
-
-	writer, err := broker.Write("test", thermocline.NoVersion)
-	if err != nil {
-		t.Errorf("could not open queue '%s'", err)
-	}
+	_, reader, writer := SetupBroker(t)
 
 	tn := rand.Intn(256)
 	//TODO(fortytw2): don't use iter for tests, even though it's nice
