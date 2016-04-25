@@ -1,6 +1,8 @@
 thermocline [![Build Status](https://travis-ci.org/fortytw2/thermocline.svg?branch=master)](https://travis-ci.org/fortytw2/thermocline) [![GoDoc](https://godoc.org/github.com/fortytw2/thermocline?status.svg)](http://godoc.org/github.com/fortytw2/thermocline) [![Go Report Card](https://goreportcard.com/badge/github.com/fortytw2/thermocline)](https://goreportcard.com/report/github.com/fortytw2/thermocline) [![codecov.io](https://codecov.io/github/fortytw2/thermocline/coverage.svg?branch=master)](https://codecov.io/github/fortytw2/thermocline?branch=master)
 ------
 
+[DEPRECATED] - Using Channels in the core broker-interface was a poor decision in hindsight. ¯\_(ツ)_/¯ check out `github.com/fortytw2/hoplite`
+
 A Library for implementing background-job-processing systems. Think of it as the implementation of the business-logic of `sidekiq`, without any convenience methods/helpful scheduling logic. Just raw workers, pools, and queues.
 
 
